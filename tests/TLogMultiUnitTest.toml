@@ -1,5 +1,5 @@
 [[test]]
-testTitle = 'Test MockTLogRecovery'
+testTitle = 'Test TestManyTLogs'
 startDelay = 0
 useDB = false
 
@@ -8,4 +8,4 @@ useDB = false
     maxTestCases = 0
     numTagsPerServer = 2
     numLogServers = 4
-    testsMatching = '/fdbserver/test/mocktlogrecoverydriver'
+    testsMatching = '/fdbserver/test/TestManyTLogs'
