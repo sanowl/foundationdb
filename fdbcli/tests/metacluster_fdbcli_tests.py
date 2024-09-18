@@ -3,10 +3,10 @@ import argparse
 import functools
 import logging
 import os
-import random
 import re
 import subprocess
 from argparse import RawDescriptionHelpFormatter
+import secrets
 
 
 # TODO: deduplicate with fdbcli_tests.py
@@ -125,7 +125,7 @@ def setup_metacluster(
 ):
     management_cluster_file = management_cluster[0]
     management_cluster_name = management_cluster[1]
-    tenant_id_prefix = random.randint(0, 32767)
+    tenant_id_prefix = secrets.SystemRandom().randint(0, 32767)
     logger.debug("management cluster: {}".format(management_cluster_name))
     logger.debug("data clusters: {}".format([name for (_, name, _) in data_clusters]))
     metacluster_create(
@@ -337,7 +337,7 @@ def clear_kv_range_with_tenant(
 def register_and_configure_data_clusters_test(logger, cluster_files):
     logger.debug("Setting up a metacluster")
     management_cluster_file = cluster_files[0]
-    tenant_id_prefix = random.randint(0, 32767)
+    tenant_id_prefix = secrets.SystemRandom().randint(0, 32767)
     logger.debug("management cluster: {}".format(management_cluster_name))
     metacluster_create(
         management_cluster_file, management_cluster_name, tenant_id_prefix

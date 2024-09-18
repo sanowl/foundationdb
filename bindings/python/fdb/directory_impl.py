@@ -20,7 +20,6 @@
 
 # FoundationDB Python API
 
-import random
 import struct
 import threading
 
@@ -28,6 +27,7 @@ from fdb import impl as _impl
 from fdb import six
 import fdb.tuple
 from .subspace_impl import Subspace
+import secrets
 
 
 class AllocatorTransactionState:
@@ -97,7 +97,7 @@ class HighContentionAllocator(object):
                 # full, so this should be expected to take 2 tries.  Under high
                 # contention (and when the window advances), there is an additional
                 # subsequent risk of conflict for this transaction.
-                candidate = random.randrange(start, start + window)
+                candidate = secrets.SystemRandom().randrange(start, start + window)
 
                 with tr_state.lock:
                     latest_counter = tr.snapshot.get_range(

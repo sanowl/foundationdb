@@ -4,10 +4,10 @@ import argparse
 import collections
 import copy
 import os
-import random
 from enum import Enum
 from pathlib import Path
 from typing import List, Any, OrderedDict, Dict
+import secrets
 
 
 class BuggifyOptionValue(Enum):
@@ -106,7 +106,7 @@ class Config:
     """
 
     def __init__(self):
-        self.random = random.Random()
+        self.random = secrets.SystemRandom().Random()
         self.cluster_file: str | None = None
         self.cluster_file_args = {
             "short_name": "C",
@@ -185,7 +185,7 @@ class Config:
         self.clean_up: bool = True
         self.clean_up_args = {"long_name": "no_clean_up", "action": "store_false"}
         self.run_dir: Path = Path("tmp")
-        self.joshua_seed: int = random.randint(0, 2**32 - 1)
+        self.joshua_seed: int = secrets.SystemRandom().randint(0, 2**32 - 1)
         self.joshua_seed_args = {
             "short_name": "s",
             "help": "A random seed",
