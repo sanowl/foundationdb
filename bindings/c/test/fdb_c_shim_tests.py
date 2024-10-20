@@ -10,6 +10,7 @@ from binary_download import FdbBinaryDownloader
 from local_cluster import LocalCluster
 from test_util import random_alphanum_string
 from fdb_version import CURRENT_VERSION, PREV_RELEASE_VERSION
+from security import safe_command
 
 TESTER_STATS_INTERVAL_SEC = 5
 DEFAULT_TEST_FILE = "CApiCorrectnessMultiThr.toml"
@@ -72,8 +73,7 @@ class TestEnv(LocalCluster):
 
     def exec_client_command(self, cmd_args, env_vars=None, expected_ret_code=0):
         print("Executing test command: {}".format(" ".join([str(c) for c in cmd_args])))
-        tester_proc = subprocess.Popen(
-            cmd_args, stdout=sys.stdout, stderr=sys.stderr, env=env_vars
+        tester_proc = safe_command.run(subprocess.Popen, cmd_args, stdout=sys.stdout, stderr=sys.stderr, env=env_vars
         )
         tester_retcode = tester_proc.wait()
         assert (

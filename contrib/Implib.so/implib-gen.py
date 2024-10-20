@@ -18,6 +18,7 @@ import subprocess
 import argparse
 import string
 import configparser
+from security import safe_command
 
 me = os.path.basename(__file__)
 root = os.path.dirname(__file__)
@@ -43,7 +44,7 @@ def run(args, stdin=""):
         del env["LANG"]
     except KeyError:
         pass
-    with subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env) as p:
+    with safe_command.run(subprocess.Popen, args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env) as p:
         out, err = p.communicate(input=stdin.encode("utf-8"))
     out = out.decode("utf-8")
     err = err.decode("utf-8")
