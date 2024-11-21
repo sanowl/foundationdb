@@ -13,6 +13,7 @@
 import sphinx_bootstrap_theme
 import sys
 import os
+import defusedxml.ElementTree
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -55,10 +56,8 @@ version_path = os.path.join(
     os.path.dirname(sys.executable), "..", "..", "..", "versions.target"
 )
 if os.path.exists(version_path):
-    # Load the version information from 'versions.target'
-    import xml.etree.ElementTree as ET
 
-    tree = ET.parse(version_path)
+    tree = defusedxml.ElementTree.parse(version_path)
     root = tree.getroot()
 
     # The version info for the project you're documenting, acts as replacement for

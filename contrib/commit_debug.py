@@ -7,6 +7,7 @@ import sys
 import xml.sax
 import heapq
 import json
+import defusedxml.sax
 
 # Usage: ./commit_debug.py trace.xml tracing.json
 #        ./commit_debug.py trace.xml.gz tracing.json
@@ -95,7 +96,7 @@ def do_file(args, handler, filename):
     openfn = gzip.open if filename.endswith(".gz") else open
     try:
         with openfn(filename) as f:
-            xml.sax.parse(f, handler)
+            defusedxml.sax.parse(f, handler)
     except xml.sax._exceptions.SAXParseException as e:
         print(e)
 
