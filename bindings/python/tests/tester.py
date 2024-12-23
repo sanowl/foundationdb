@@ -22,10 +22,10 @@
 import json
 import math
 import os
-import random
 import struct
 import sys
 import threading
+import secrets
 
 sys.path[:0] = [os.path.join(os.path.dirname(__file__), "..")]
 import fdb
@@ -38,7 +38,7 @@ from fdb import six
 from fdb.impl import strinc
 from unit_tests import run_unit_tests
 
-random.seed(0)
+secrets.SystemRandom().seed(0)
 
 if len(sys.argv) == 4:
     db = fdb.open(sys.argv[3])
@@ -235,7 +235,7 @@ class Tester:
                     inst.push(inst.tr.on_error(inst.pop()))
                 elif inst.op == six.u("GET"):
                     key = inst.pop()
-                    num = random.randint(0, 2)
+                    num = secrets.SystemRandom().randint(0, 2)
                     if num == 0:
                         f = obj[key]
                     elif num == 1:
@@ -267,7 +267,7 @@ class Tester:
 
                 elif inst.op == six.u("GET_RANGE"):
                     begin, end, limit, reverse, mode = inst.pop(5)
-                    if limit == 0 and mode == -1 and random.random() < 0.5:
+                    if limit == 0 and mode == -1 and secrets.SystemRandom().random() < 0.5:
                         if reverse:
                             r = obj[begin:end:-1]
                         else:
@@ -296,7 +296,7 @@ class Tester:
                     ) = inst.pop(10)
                     beginSel = fdb.KeySelector(begin_key, begin_or_equal, begin_offset)
                     endSel = fdb.KeySelector(end_key, end_or_equal, end_offset)
-                    if limit == 0 and mode == -1 and random.random() < 0.5:
+                    if limit == 0 and mode == -1 and secrets.SystemRandom().random() < 0.5:
                         if reverse:
                             r = obj[beginSel:endSel:-1]
                         else:
@@ -310,7 +310,7 @@ class Tester:
                     inst.push(b"GOT_READ_VERSION")
                 elif inst.op == six.u("SET"):
                     key, value = inst.pop(2)
-                    if random.random() < 0.5:
+                    if secrets.SystemRandom().random() < 0.5:
                         obj[key] = value
                     else:
                         obj.set(key, value)
@@ -337,7 +337,7 @@ class Tester:
                 elif inst.op == six.u("SET_READ_VERSION"):
                     inst.tr.set_read_version(self.last_version)
                 elif inst.op == six.u("CLEAR"):
-                    if random.random() < 0.5:
+                    if secrets.SystemRandom().random() < 0.5:
                         del obj[inst.pop()]
                     else:
                         obj.clear(inst.pop())
@@ -346,7 +346,7 @@ class Tester:
                         inst.push(b"RESULT_NOT_PRESENT")
                 elif inst.op == six.u("CLEAR_RANGE"):
                     begin, end = inst.pop(2)
-                    num = random.randint(0, 2)
+                    num = secrets.SystemRandom().randint(0, 2)
                     if num == 0:
                         del obj[begin:end]
                     elif num == 1:
@@ -398,7 +398,7 @@ class Tester:
                     items = inst.pop(count)
                     if (
                         not fdb.tuple.has_incomplete_versionstamp(items)
-                        and random.random() < 0.5
+                        and secrets.SystemRandom().random() < 0.5
                     ):
                         inst.push(b"ERROR: NONE")
                     else:

@@ -5,7 +5,6 @@ import asyncio
 import logging
 import os
 import os.path
-import random
 import sys
 
 import lib.fdb_process
@@ -13,6 +12,7 @@ import lib.local_cluster
 import lib.process
 
 from typing import List, Union
+import secrets
 
 logger = logging.getLogger("binding_test")
 
@@ -338,7 +338,7 @@ async def run_binding_tests(
 
     async def run_test_random():
         nonlocal num_failures
-        test = random.choice(tests)
+        test = secrets.choice(tests)
         test_success = await test()
         if not test_success:
             num_failures += 1

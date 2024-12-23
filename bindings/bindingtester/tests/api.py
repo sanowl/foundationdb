@@ -18,7 +18,6 @@
 # limitations under the License.
 #
 
-import random
 import struct
 
 import fdb
@@ -28,6 +27,7 @@ from bindingtester import FDB_API_VERSION
 from bindingtester import util
 from bindingtester.tests import Test, Instruction, InstructionSet, ResultSpecification
 from bindingtester.tests import test_util
+import secrets
 
 fdb.api_version(FDB_API_VERSION)
 
@@ -105,16 +105,16 @@ class ApiTest(Test):
 
     def ensure_string(self, instructions, num):
         while self.string_depth < num:
-            instructions.push_args(self.random.random_string(random.randint(0, 100)))
+            instructions.push_args(self.random.random_string(secrets.SystemRandom().randint(0, 100)))
             self.add_strings(1)
 
         self.remove(num)
 
     def choose_key(self):
-        if random.random() < float(len(self.generated_keys)) / self.max_keys:
-            tup = random.choice(self.generated_keys)
-            if random.random() < 0.3:
-                return self.workspace.pack(tup[0 : random.randint(0, len(tup))])
+        if secrets.SystemRandom().random() < float(len(self.generated_keys)) / self.max_keys:
+            tup = secrets.choice(self.generated_keys)
+            if secrets.SystemRandom().random() < 0.3:
+                return self.workspace.pack(tup[0 : secrets.SystemRandom().randint(0, len(tup))])
 
             return self.workspace.pack(tup)
 
@@ -133,7 +133,7 @@ class ApiTest(Test):
     def ensure_key_value(self, instructions):
         if self.string_depth == 0:
             instructions.push_args(
-                self.choose_key(), self.random.random_string(random.randint(0, 100))
+                self.choose_key(), self.random.random_string(secrets.SystemRandom().randint(0, 100))
             )
 
         elif self.string_depth == 1 or self.key_depth == 0:
@@ -165,13 +165,13 @@ class ApiTest(Test):
             instructions.append("WAIT_FUTURE")
 
     def choose_tenant(self, new_tenant_probability):
-        if len(self.allocated_tenants) == 0 or random.random() < new_tenant_probability:
-            return self.random.random_string(random.randint(0, 30))
+        if len(self.allocated_tenants) == 0 or secrets.SystemRandom().random() < new_tenant_probability:
+            return self.random.random_string(secrets.SystemRandom().randint(0, 30))
         else:
             tenant_list = list(self.allocated_tenants)
             # sort to ensure deterministic selection of a tenant
             tenant_list.sort()
-            return random.choice(tenant_list)
+            return secrets.choice(tenant_list)
 
     def generate(self, args, thread_number):
         instructions = InstructionSet()
@@ -261,9 +261,9 @@ class ApiTest(Test):
         atomic_ops = idempotent_atomic_ops + ["ADD", "BIT_XOR", "APPEND_IF_FITS"]
 
         if args.concurrency > 1:
-            self.max_keys = random.randint(100, 1000)
+            self.max_keys = secrets.SystemRandom().randint(100, 1000)
         else:
-            self.max_keys = random.randint(100, 10000)
+            self.max_keys = secrets.SystemRandom().randint(100, 10000)
 
         instructions.append("NEW_TRANSACTION")
         instructions.append("GET_READ_VERSION")
@@ -273,7 +273,7 @@ class ApiTest(Test):
         instructions.setup_complete()
 
         for i in range(args.num_ops):
-            op = random.choice(op_choices)
+            op = secrets.choice(op_choices)
             index = len(instructions)
             read_performed = False
 
@@ -302,7 +302,7 @@ class ApiTest(Test):
                 self.can_use_key_selectors = True
 
             elif op == "ON_ERROR":
-                instructions.push_args(random.randint(0, 5000))
+                instructions.push_args(secrets.SystemRandom().randint(0, 5000))
                 instructions.append(op)
 
                 self.outstanding_ops.append((self.stack_size, len(instructions) - 1))
@@ -438,9 +438,9 @@ class ApiTest(Test):
             elif matches_op(op, "ATOMIC_OP"):
                 self.ensure_key_value(instructions)
                 if is_non_transaction_op(op) and args.concurrency == 1:
-                    instructions.push_args(random.choice(idempotent_atomic_ops))
+                    instructions.push_args(secrets.choice(idempotent_atomic_ops))
                 else:
-                    instructions.push_args(random.choice(atomic_ops))
+                    instructions.push_args(secrets.choice(atomic_ops))
 
                 instructions.append(op)
                 if is_non_transaction_op(op):
@@ -451,7 +451,7 @@ class ApiTest(Test):
                 key1 = self.versionstamped_values.pack((rand_str1,))
                 key2 = self.versionstamped_values_2.pack((rand_str1,))
 
-                split = random.randint(0, 70)
+                split = secrets.SystemRandom().randint(0, 70)
                 prefix = self.random.random_string(20 + split)
                 if prefix.endswith(b"\xff"):
                     # Necessary to make sure that the SET_VERSIONSTAMPED_VALUE check
@@ -498,7 +498,7 @@ class ApiTest(Test):
                 instructions.append(op)
 
             elif op == "COMMIT":
-                if args.concurrency == 1 or i < self.max_keys or random.random() < 0.9:
+                if args.concurrency == 1 or i < self.max_keys or secrets.SystemRandom().random() < 0.9:
                     if args.concurrency == 1:
                         self.wait_for_reads(instructions)
                     test_util.blocking_commit(instructions)
@@ -522,7 +522,7 @@ class ApiTest(Test):
 
             elif op == "GET_COMMITTED_VERSION":
                 if self.can_get_commit_version:
-                    do_commit = random.random() < 0.5
+                    do_commit = secrets.SystemRandom().random() < 0.5
 
                     if do_commit:
                         instructions.append("COMMIT")

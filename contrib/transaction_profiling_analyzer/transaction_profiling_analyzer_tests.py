@@ -21,10 +21,9 @@
 
 from transaction_profiling_analyzer import RangeCounter
 from sortedcontainers import SortedDict
-
-import random
 import string
 import unittest
+import secrets
 
 
 class RangeCounterTest(unittest.TestCase):
@@ -127,8 +126,8 @@ class RangeCounterTest(unittest.TestCase):
                 )
 
             for _ in range(0, 100):
-                i = random.randint(0, len(letters) - 1)
-                j = random.randint(0, len(letters) - 2)
+                i = secrets.SystemRandom().randint(0, len(letters) - 1)
+                j = secrets.SystemRandom().randint(0, len(letters) - 2)
                 if i == j:
                     j += 1
                 start_index = min(i, j)

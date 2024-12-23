@@ -22,7 +22,6 @@
 
 import sys
 import subprocess
-import random
 import argparse
 import os
 import copy
@@ -33,6 +32,7 @@ import logging.config
 
 from collections import OrderedDict
 from functools import reduce
+import secrets
 
 sys.path[:0] = [os.path.join(os.path.dirname(__file__), "..")]
 
@@ -240,16 +240,15 @@ def choose_api_version(
                 )
             )
 
-        if random.random() < 0.7:
+        if secrets.SystemRandom().random() < 0.7:
             api_version = max_version
-        elif random.random() < 0.7:
+        elif secrets.SystemRandom().random() < 0.7:
             api_version = min_version
-        elif random.random() < 0.9:
-            api_version = random.choice(
-                [v for v in API_VERSIONS if v >= min_version and v <= max_version]
+        elif secrets.SystemRandom().random() < 0.9:
+            api_version = secrets.choice([v for v in API_VERSIONS if v >= min_version and v <= max_version]
             )
         else:
-            api_version = random.randint(min_version, max_version)
+            api_version = secrets.SystemRandom().randint(min_version, max_version)
 
     return api_version
 
@@ -259,7 +258,7 @@ class TestRunner(object):
         self.args = copy.copy(args)
 
         self.db = fdb.open(self.args.cluster_file)
-        self.test_seed = random.randint(0, 0xFFFFFFFF)
+        self.test_seed = secrets.SystemRandom().randint(0, 0xFFFFFFFF)
 
         self.testers = [Tester.get_test(self.args.test1)]
         if self.args.test2 is not None:
@@ -400,7 +399,7 @@ class TestRunner(object):
             )
         )
 
-        random.seed(self.test_seed)
+        secrets.SystemRandom().seed(self.test_seed)
 
         if self.args.concurrency == 1:
             self.test.setup(self.args)
@@ -754,9 +753,9 @@ def main(argv):
         validate_args(args)
 
         if args.seed is None:
-            args.seed = random.randint(0, 0xFFFFFFFF)
+            args.seed = secrets.SystemRandom().randint(0, 0xFFFFFFFF)
 
-        random.seed(args.seed)
+        secrets.SystemRandom().seed(args.seed)
 
         if args.enable_client_trace_logging is not None:
             fdb.options.set_trace_enable(args.enable_client_trace_logging)
