@@ -13,6 +13,7 @@ import subprocess
 import sys
 
 from typing import List, Union
+from security import safe_command
 
 logger = logging.getLogger()
 
@@ -159,8 +160,7 @@ class SourceScanner:
         if self._extra_arg:
             command.extend(["--extra-arg", self._extra_arg])
 
-        parsed = subprocess.run(
-            command,
+        parsed = safe_command.run(subprocess.run, command,
             capture_output=True,
         )
         stderr = parsed.stderr.decode("utf-8")
