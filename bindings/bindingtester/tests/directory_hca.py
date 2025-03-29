@@ -18,7 +18,6 @@
 # limitations under the License.
 #
 
-import random
 
 import fdb
 
@@ -27,6 +26,7 @@ from bindingtester import util
 
 from bindingtester.tests import Test, Instruction, InstructionSet, ResultSpecification
 from bindingtester.tests import test_util, directory_util
+import secrets
 
 fdb.api_version(FDB_API_VERSION)
 
@@ -58,7 +58,7 @@ class DirectoryHcaTest(Test):
 
     def commit_transactions(self, instructions, args):
         for tr in self.transactions:
-            if random.random() < 0.8 or args.api_version < 300:
+            if secrets.SystemRandom().random() < 0.8 or args.api_version < 300:
                 instructions.push_args(tr)
                 instructions.append("USE_TRANSACTION")
                 test_util.blocking_commit(instructions)
@@ -102,7 +102,7 @@ class DirectoryHcaTest(Test):
             if args.concurrency > 1:
                 self.barrier(instructions, thread_number)
 
-            instructions.push_args(random.choice(self.transactions))
+            instructions.push_args(secrets.choice(self.transactions))
             instructions.append("USE_TRANSACTION")
 
             if thread_number == 0 and args.concurrency > 1:
@@ -111,7 +111,7 @@ class DirectoryHcaTest(Test):
                 num_directories = int(
                     max(
                         1,
-                        pow(random.random(), 4)
+                        pow(secrets.SystemRandom().random(), 4)
                         * min(
                             self.max_directories_per_transaction,
                             args.num_ops - current_op,

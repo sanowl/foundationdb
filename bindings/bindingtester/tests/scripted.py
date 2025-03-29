@@ -18,7 +18,6 @@
 # limitations under the License.
 #
 
-import random
 
 import fdb
 
@@ -32,6 +31,7 @@ from bindingtester.tests import (
     ResultSpecification,
 )
 from bindingtester.tests import test_util
+import secrets
 
 fdb.api_version(FDB_API_VERSION)
 
@@ -457,7 +457,7 @@ class ScriptedTest(Test):
                 self.workspace.pack(
                     (
                         b"foo",
-                        bytes([random.randint(0, 254) for i in range(0, kv_length)]),
+                        bytes([secrets.SystemRandom().randint(0, 254) for i in range(0, kv_length)]),
                     )
                 )
             )

@@ -22,7 +22,6 @@
 
 import ctypes
 import sys
-import random
 import struct
 import unicodedata
 import math
@@ -33,30 +32,31 @@ from fdb.tuple import pack, unpack, compare, SingleFloat
 
 from fdb import six
 from fdb.six import u
+import secrets
 
 
 def randomUnicode():
     while True:
-        c = random.randint(0, 0xFFFF)
+        c = secrets.SystemRandom().randint(0, 0xFFFF)
         if unicodedata.category(six.unichr(c))[0] in "LMNPSZ":
             return six.unichr(c)
 
 
 def randomElement():
-    r = random.randint(0, 9)
+    r = secrets.SystemRandom().randint(0, 9)
     if r == 0:
-        if random.random() < 0.5:
+        if secrets.SystemRandom().random() < 0.5:
             chars = [b"\x00", b"\x01", b"a", b"7", b"\xfe", b"\ff"]
-            return b"".join([random.choice(chars) for c in range(random.randint(0, 5))])
+            return b"".join([secrets.choice(chars) for c in range(secrets.SystemRandom().randint(0, 5))])
         else:
             return b"".join(
                 [
-                    six.int2byte(random.randint(0, 255))
-                    for _ in range(random.randint(0, 10))
+                    six.int2byte(secrets.SystemRandom().randint(0, 255))
+                    for _ in range(secrets.SystemRandom().randint(0, 10))
                 ]
             )
     elif r == 1:
-        if random.random() < 0.5:
+        if secrets.SystemRandom().random() < 0.5:
             chars = [
                 u("\x00"),
                 u("\x01"),
@@ -71,47 +71,45 @@ def randomElement():
                 u("\U0001f4a9"),
             ]
             return u("").join(
-                [random.choice(chars) for c in range(random.randint(0, 10))]
+                [secrets.choice(chars) for c in range(secrets.SystemRandom().randint(0, 10))]
             )
         else:
-            return u("").join([randomUnicode() for _ in range(random.randint(0, 10))])
+            return u("").join([randomUnicode() for _ in range(secrets.SystemRandom().randint(0, 10))])
     elif r == 2:
-        return random.choice([-1, 1]) * min(
-            2 ** random.randint(0, 2040) + random.randint(-10, 10), 2**2040 - 1
+        return secrets.choice([-1, 1]) * min(
+            2 ** secrets.SystemRandom().randint(0, 2040) + secrets.SystemRandom().randint(-10, 10), 2**2040 - 1
         )
     elif r == 3:
-        return random.choice([-1, 1]) * 2 ** random.randint(0, 64) + random.randint(
-            -10, 10
+        return secrets.choice([-1, 1]) * 2 ** secrets.SystemRandom().randint(0, 64) + secrets.SystemRandom().randint(-10, 10
         )
     elif r == 4:
         return None
     elif r == 5:
-        ret = random.choice(
-            [float("-nan"), float("-inf"), -0.0, 0.0, float("inf"), float("nan")]
+        ret = secrets.choice([float("-nan"), float("-inf"), -0.0, 0.0, float("inf"), float("nan")]
         )
-        if random.random() < 0.5:
+        if secrets.SystemRandom().random() < 0.5:
             return SingleFloat(ret)
         else:
             return ret
     elif r == 6:
-        is_double = random.random() < 0.5
+        is_double = secrets.SystemRandom().random() < 0.5
         byte_str = b"".join(
-            [six.int2byte(random.randint(0, 255)) for _ in range(8 if is_double else 4)]
+            [six.int2byte(secrets.SystemRandom().randint(0, 255)) for _ in range(8 if is_double else 4)]
         )
         if is_double:
             return struct.unpack(">d", byte_str)[0]
         else:
             return SingleFloat(struct.unpack(">f", byte_str)[0])
     elif r == 7:
-        return random.random() < 0.5
+        return secrets.SystemRandom().random() < 0.5
     elif r == 8:
         return uuid.uuid4()
     elif r == 9:
-        return [randomElement() for _ in range(random.randint(0, 5))]
+        return [randomElement() for _ in range(secrets.SystemRandom().randint(0, 5))]
 
 
 def randomTuple():
-    return tuple(randomElement() for x in range(random.randint(0, 4)))
+    return tuple(randomElement() for x in range(secrets.SystemRandom().randint(0, 4)))
 
 
 def isprefix(a, b):

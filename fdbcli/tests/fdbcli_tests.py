@@ -9,8 +9,8 @@ import functools
 import json
 import tempfile
 import time
-import random
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+import secrets
 
 
 def enable_logging(level=logging.DEBUG):
@@ -208,7 +208,7 @@ def setclass(logger):
         network_address = ":".join(line.split(":")[:2])
         logger.debug("Network address: {}".format(network_address))
         addresses.append(network_address)
-    random_address = random.choice(addresses)
+    random_address = secrets.choice(addresses)
     logger.debug("Randomly selected address: {}".format(random_address))
     # set class to a random valid type
     class_types = [
@@ -229,7 +229,7 @@ def setclass(logger):
         "storage_cache",
         "backup",
     ]
-    random_class_type = random.choice(class_types)
+    random_class_type = secrets.choice(class_types)
     logger.debug("Change to type: {}".format(random_class_type))
     run_fdbcli_command("setclass", random_address, random_class_type)
     # check the set successful
@@ -740,7 +740,7 @@ def exclude(logger):
     output1 = run_fdbcli_command("exclude")
     assert no_excluded_process_output in output1
     # randomly pick one and exclude the process
-    excluded_address = random.choice(addresses)
+    excluded_address = secrets.choice(addresses)
     # If we see "not enough space" error, use FORCE option to proceed
     # this should be a safe operation as we do not need any storage space for the test
     force = False

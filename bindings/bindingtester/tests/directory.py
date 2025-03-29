@@ -18,7 +18,6 @@
 # limitations under the License.
 #
 
-import random
 
 import fdb
 
@@ -29,6 +28,7 @@ from bindingtester.tests import Test, Instruction, InstructionSet, ResultSpecifi
 from bindingtester.tests import test_util, directory_util
 
 from bindingtester.tests.directory_state_tree import DirectoryStateTreeNode
+import secrets
 
 fdb.api_version(FDB_API_VERSION)
 
@@ -56,16 +56,16 @@ class DirectoryTest(Test):
         self.dir_index = directory_util.DEFAULT_DIRECTORY_INDEX
 
     def generate_layer(self, allow_partition=True):
-        if random.random() < 0.7:
+        if secrets.SystemRandom().random() < 0.7:
             return b""
         else:
-            choice = random.randint(0, 3)
+            choice = secrets.SystemRandom().randint(0, 3)
             if choice == 0 and allow_partition:
                 return b"partition"
             elif choice == 1:
                 return b"test_layer"
             else:
-                return self.random.random_string(random.randint(0, 5))
+                return self.random.random_string(secrets.SystemRandom().randint(0, 5))
 
     def setup(self, args):
         self.dir_index = 0
@@ -152,9 +152,9 @@ class DirectoryTest(Test):
         instructions.setup_complete()
 
         for i in range(args.num_ops):
-            if random.random() < 0.5:
+            if secrets.SystemRandom().random() < 0.5:
                 while True:
-                    self.dir_index = random.randrange(0, len(self.dir_list))
+                    self.dir_index = secrets.SystemRandom().randrange(0, len(self.dir_list))
                     if (
                         not self.dir_list[self.dir_index].state.is_partition
                         or not self.dir_list[self.dir_index].state.deleted
@@ -172,7 +172,7 @@ class DirectoryTest(Test):
             if dir_entry.state.is_subspace:
                 choices += subspace
 
-            op = random.choice(choices)
+            op = secrets.choice(choices)
 
             # print('%d. Selected %s, dir=%d, dir_id=%d, has_known_prefix=%d, dir_list_len=%d' \
             #       % (len(instructions), op, self.dir_index, dir_entry.dir_id, dir_entry.state.has_known_prefix, len(self.dir_list)))
@@ -217,7 +217,7 @@ class DirectoryTest(Test):
                         DirectoryStateTreeNode(False, True, has_known_prefix=True)
                     )
 
-                instructions.push_args(random.choice([0, 1]))
+                instructions.push_args(secrets.choice([0, 1]))
                 instructions.push_args(*indices)
                 instructions.append(op)
                 self.dir_list.append(DirectoryStateTreeNode.get_layer(prefixes[0]))
@@ -368,7 +368,7 @@ class DirectoryTest(Test):
                     test_util.blocking_commit(instructions)
 
                 path = ()
-                count = random.randint(0, 1)
+                count = secrets.SystemRandom().randint(0, 1)
                 if count == 1:
                     path = generate_path()
                     instructions.push_args(*test_util.with_length(path))
@@ -388,7 +388,7 @@ class DirectoryTest(Test):
 
             elif root_op == "DIRECTORY_LIST" or root_op == "DIRECTORY_EXISTS":
                 path = ()
-                count = random.randint(0, 1)
+                count = secrets.SystemRandom().randint(0, 1)
                 if count == 1:
                     path = generate_path()
                     instructions.push_args(*test_util.with_length(path))
@@ -404,7 +404,7 @@ class DirectoryTest(Test):
             elif root_op == "DIRECTORY_UNPACK_KEY" or root_op == "DIRECTORY_CONTAINS":
                 if (
                     not dir_entry.state.has_known_prefix
-                    or random.random() < 0.2
+                    or secrets.SystemRandom().random() < 0.2
                     or root_op == "DIRECTORY_UNPACK_KEY"
                 ):
                     t = self.random.random_tuple(5)
@@ -495,44 +495,44 @@ class DirectoryTest(Test):
 
 
 def generate_path(min_length=0):
-    length = int(random.random() * random.random() * (4 - min_length)) + min_length
+    length = int(secrets.SystemRandom().random() * secrets.SystemRandom().random() * (4 - min_length)) + min_length
     path = ()
     for i in range(length):
-        if random.random() < 0.05:
+        if secrets.SystemRandom().random() < 0.05:
             path = path + ("",)
         else:
-            path = path + (random.choice(["1", "2", "3"]),)
+            path = path + (secrets.choice(["1", "2", "3"]),)
 
     return path
 
 
 def generate_prefix(require_unique=False, is_partition=False, min_length=1):
     fixed_prefix = b"abcdefg"
-    if not require_unique and min_length == 0 and random.random() < 0.8:
+    if not require_unique and min_length == 0 and secrets.SystemRandom().random() < 0.8:
         return None
     elif (
         require_unique
         or is_partition
         or min_length > len(fixed_prefix)
-        or random.random() < 0.5
+        or secrets.SystemRandom().random() < 0.5
     ):
         if require_unique:
             min_length = max(min_length, 16)
 
-        length = random.randint(min_length, min_length + 5)
+        length = secrets.SystemRandom().randint(min_length, min_length + 5)
         if length == 0:
             return b""
 
         if not is_partition:
-            first = random.randint(ord("\x1d"), 255) % 255
+            first = secrets.SystemRandom().randint(ord("\x1d"), 255) % 255
             return bytes(
-                [first] + [random.randrange(0, 256) for i in range(0, length - 1)]
+                [first] + [secrets.SystemRandom().randrange(0, 256) for i in range(0, length - 1)]
             )
         else:
             return bytes(
-                [random.randrange(ord("\x02"), ord("\x14")) for i in range(0, length)]
+                [secrets.SystemRandom().randrange(ord("\x02"), ord("\x14")) for i in range(0, length)]
             )
     else:
         prefix = fixed_prefix
-        generated = prefix[0 : random.randrange(min_length, len(prefix))]
+        generated = prefix[0 : secrets.SystemRandom().randrange(min_length, len(prefix))]
         return generated
