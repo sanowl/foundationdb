@@ -34,6 +34,8 @@ import toml
 # fmt: off
 from tmp_cluster import TempCluster
 from local_cluster import TLSConfig
+from security import safe_command
+
 # fmt: on
 
 sys.path[:0] = [
@@ -130,7 +132,7 @@ def run_tester(args, cluster, test_file):
         cmd += ["--knob-" + knob_name, knob_value]
 
     get_logger().info("\nRunning tester '%s'..." % " ".join(map(str, cmd)))
-    proc = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    proc = safe_command.run(Popen, cmd, stdout=sys.stdout, stderr=sys.stderr)
     timed_out = False
     ret_code = 1
     try:

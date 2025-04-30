@@ -10,6 +10,7 @@ import argparse
 import json
 import subprocess
 import sys
+from security import safe_command
 
 FOUNDATIONDB_GITHUB = "https://github.com/apple/foundationdb"
 
@@ -32,8 +33,7 @@ def diff_branches_by_commit(from_branch, to_branch):
         "--no-merges",
         "--oneline",
     ]
-    process = subprocess.run(
-        command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    process = safe_command.run(subprocess.run, command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
 
     if process.returncode != 0:
@@ -71,8 +71,7 @@ def get_pr_from_commit(commit_hash):
         "--json",
         "number,author,title",
     ]
-    process = subprocess.run(
-        command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    process = safe_command.run(subprocess.run, command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
 
     if process.returncode != 0:

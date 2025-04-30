@@ -7,6 +7,7 @@ import random
 import re
 import subprocess
 from argparse import RawDescriptionHelpFormatter
+from security import safe_command
 
 
 # TODO: deduplicate with fdbcli_tests.py
@@ -49,8 +50,7 @@ def run_fdbcli_command(cluster_file, *args):
     command_template = [fdbcli_bin, "-C", "{}".format(cluster_file), "--exec"]
     commands = command_template + ["{}".format(" ".join(args))]
     try:
-        process = subprocess.run(
-            commands,
+        process = safe_command.run(subprocess.run, commands,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=fdbcli_env,

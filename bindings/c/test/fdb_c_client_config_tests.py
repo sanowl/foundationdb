@@ -16,6 +16,7 @@ from fdb_version import CURRENT_VERSION, PREV_RELEASE_VERSION, PREV2_RELEASE_VER
 from binary_download import FdbBinaryDownloader
 from local_cluster import LocalCluster, PortProvider, TLSConfig
 from test_util import random_alphanum_string
+from security import safe_command
 
 args = None
 downloader = None
@@ -337,8 +338,7 @@ class ClientConfigTest:
             "\nExecuting test command: {}".format(" ".join([str(c) for c in cmd_args])),
             file=sys.stderr,
         )
-        tester_proc = subprocess.Popen(
-            cmd_args, stdout=subprocess.PIPE, stderr=sys.stderr
+        tester_proc = safe_command.run(subprocess.Popen, cmd_args, stdout=subprocess.PIPE, stderr=sys.stderr
         )
         out, _ = tester_proc.communicate()
         self.tc.assertEqual(0, tester_proc.returncode)
