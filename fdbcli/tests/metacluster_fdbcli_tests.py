@@ -66,7 +66,7 @@ def run_fdbcli_command(cluster_file, *args):
 
 def get_cluster_connection_str(cluster_file_path):
     with open(cluster_file_path, "r") as f:
-        conn_str = f.readline().strip()
+        conn_str = f.readline(5_000_000).strip()
         return conn_str
 
 
