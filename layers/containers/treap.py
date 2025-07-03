@@ -19,7 +19,7 @@
 #
 
 import fdb
-import random
+import secrets
 
 fdb.init("10.0.1.22:1234")
 
@@ -81,7 +81,7 @@ class FdbTreap (object):
     def setKey(self, tr, key, value, metric):
         isNew = True
         isRoot = True
-        child = tuple(key, tuple("", "", random.random(), metric, value))
+        child = tuple(key, tuple("", "", secrets.SystemRandom().random(), metric, value))
         parent = tuple()
 
         # find self or parent

@@ -27,13 +27,14 @@ import logging
 import signal
 from pathlib import Path
 import glob
-import random
 import string
 import toml
 
 # fmt: off
 from tmp_cluster import TempCluster
 from local_cluster import TLSConfig
+import secrets
+
 # fmt: on
 
 sys.path[:0] = [
@@ -47,7 +48,7 @@ TESTER_STATS_INTERVAL_SEC = 5
 
 def random_string(len):
     return "".join(
-        random.choice(string.ascii_letters + string.digits) for i in range(len)
+        secrets.choice(string.ascii_letters + string.digits) for i in range(len)
     )
 
 
@@ -172,8 +173,7 @@ class TestConfig:
         self.server_chain_len = server_config.get("tls_server_chain_len", 3)
         self.min_num_processes = server_config.get("min_num_processes", 1)
         self.max_num_processes = server_config.get("max_num_processes", 3)
-        self.num_processes = random.randint(
-            self.min_num_processes, self.max_num_processes
+        self.num_processes = secrets.SystemRandom().randint(self.min_num_processes, self.max_num_processes
         )
 
 

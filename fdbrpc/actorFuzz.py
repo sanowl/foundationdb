@@ -18,8 +18,8 @@
 # limitations under the License.
 #
 
-import random
 import copy
+import secrets
 
 
 class Context:
@@ -28,7 +28,7 @@ class Context:
     indent = 0
 
     def __init__(self):
-        self.random = random.Random()
+        self.random = secrets.SystemRandom().Random()
 
     def uniqueID(self):
         return self.random.randint(100000, 999999)

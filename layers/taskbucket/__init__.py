@@ -20,12 +20,13 @@
 
 # FoundationDB TaskBucket layer
 
-import random
 import uuid
 import time
 import struct
 import fdb
 import fdb.tuple
+import secrets
+
 fdb.api_version(200)
 
 # TODO: Make this fdb.tuple.subspace() or similar?
@@ -127,7 +128,7 @@ class TaskBucket (object):
                 return None
         key = self.available.unpack(k)[0]
         avail = self.available[key]
-        timeout = tr.get_read_version().wait() + long(self.timeout * (0.9 + 0.2 * random.random()))
+        timeout = tr.get_read_version().wait() + long(self.timeout * (0.9 + 0.2 * secrets.SystemRandom().random()))
 
         taskDict = {}
         for k, v in tr[avail.range(())]:
