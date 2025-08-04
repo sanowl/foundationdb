@@ -33,6 +33,7 @@ import logging.config
 
 from collections import OrderedDict
 from functools import reduce
+from security import safe_command
 
 sys.path[:0] = [os.path.join(os.path.dirname(__file__), "..")]
 
@@ -457,7 +458,7 @@ class TestRunner(object):
 
         util.get_logger().info("\nRunning tester '%s'..." % " ".join(params))
         sys.stdout.flush()
-        proc = subprocess.Popen(params)
+        proc = safe_command.run(subprocess.Popen, params)
         timed_out = Event()
 
         def killProc():

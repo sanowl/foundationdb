@@ -18,6 +18,7 @@ import fdb
 import joshua.joshua_model as joshua
 
 from typing import List, Union
+from security import safe_command
 
 # Defined in SimulatedCluster.actor.cpp:SimulationConfig::setStorageEngine
 ROCKSDB_TRACEEVENT_STRING = ["RocksDBNonDeterminism", "ShardedRocksDBNonDeterminism"]
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 def _execute_grep(string: str, paths: List[pathlib.Path]) -> bool:
     command = ["grep", "-F", string] + [str(path) for path in paths]
-    result = subprocess.run(command, stdout=subprocess.DEVNULL)
+    result = safe_command.run(subprocess.run, command, stdout=subprocess.DEVNULL)
     return result.returncode == 0
 
 
@@ -62,12 +63,12 @@ def _tar_logs(log_files: List[pathlib.Path], output_file_name: pathlib.Path):
         str(log_file) for log_file in log_files
     ]
     logger.debug(f"Execute tar: {command}")
-    subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
+    safe_command.run(subprocess.run, command, check=True, stdout=subprocess.DEVNULL)
 
 
 def _tar_extract(path_to_archive: pathlib.Path):
     command = ["tar", "xf", str(path_to_archive)]
-    subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
+    safe_command.run(subprocess.run, command, check=True, stdout=subprocess.DEVNULL)
 
 
 def report_error(

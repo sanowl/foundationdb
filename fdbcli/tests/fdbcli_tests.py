@@ -11,6 +11,7 @@ import tempfile
 import time
 import random
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from security import safe_command
 
 
 def enable_logging(level=logging.DEBUG):
@@ -53,7 +54,7 @@ def run_fdbcli_command(*args):
         string: Console output from fdbcli
     """
     commands = command_template + ["{}".format(" ".join(args))]
-    process = subprocess.run(commands, stdout=subprocess.PIPE, env=fdbcli_env)
+    process = safe_command.run(subprocess.run, commands, stdout=subprocess.PIPE, env=fdbcli_env)
     return process.stdout.decode("utf-8").strip()
 
 
@@ -65,8 +66,7 @@ def run_fdbcli_command_and_get_error(*args):
     """
     commands = command_template + ["{}".format(" ".join(args))]
     return (
-        subprocess.run(
-            commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=fdbcli_env
+        safe_command.run(subprocess.run, commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=fdbcli_env
         )
         .stderr.decode("utf-8")
         .strip()
@@ -279,8 +279,7 @@ def lockAndUnlock(logger):
     output2 = run_fdbcli_command_and_get_error("lock")
     assert output2 == "ERROR: Database is locked (1038)"
     # unlock the database
-    process = subprocess.Popen(
-        command_template + ["unlock " + lock_uid],
+    process = safe_command.run(subprocess.Popen, command_template + ["unlock " + lock_uid],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -310,8 +309,7 @@ def kill(logger):
     # This is currently an issue with fdbcli,
     # where you need to first run 'kill' to initialize processes' list
     # and then specify the certain process to kill
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -335,8 +333,7 @@ def killall(logger):
     # This is currently an issue with fdbcli,
     # where you need to first run 'kill' to initialize processes' list
     # and then specify the certain process to kill
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -385,8 +382,7 @@ def suspend(logger):
     assert len(pinfo) == 1
     pid = pinfo[0].split(" ")[0]
     logger.debug("Pid: {}".format(pid))
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -599,8 +595,7 @@ def transaction(logger):
     assert (
         err1 == "ERROR: writemode must be enabled to set or clear keys in the database."
     )
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -630,8 +625,7 @@ def transaction(logger):
     output2 = run_fdbcli_command("get", "key")
     assert output2 == "`key' is `value'"
     # test rollback and read-your-write behavior
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -655,8 +649,7 @@ def transaction(logger):
     output4 = run_fdbcli_command("get", "key")
     assert output4 == "`key' is `value'"
     # test read_your_write_disable option and clear the inserted key
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -919,8 +912,7 @@ def tenant_delete(logger):
     run_fdbcli_command("writemode on; usetenant tenant2; set tenant_test value")
 
     # delete a tenant while the fdbcli is using that tenant
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -950,8 +942,7 @@ def tenant_delete(logger):
     assert error_lines[1] == "ERROR: Tenant `tenant' does not exist"
 
     # delete a non-empty tenant
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -1256,8 +1247,7 @@ def tenant_usetenant(logger):
     output = run_fdbcli_command("get tenant_test")
     assert output == "`tenant_test' is `default_tenant'"
 
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -1275,8 +1265,7 @@ def tenant_usetenant(logger):
     assert lines[1] == "`tenant_test': not found"
     assert lines[2].startswith("Committed")
 
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -1296,8 +1285,7 @@ def tenant_usetenant(logger):
     assert lines[2].startswith("Committed")
     assert lines[3] == "`tenant_test' is `tenant2'"
 
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         env=fdbcli_env,
@@ -1449,8 +1437,7 @@ def idempotency_ids(logger):
 
 
 def integer_options():
-    process = subprocess.Popen(
-        command_template[:-1],
+    process = safe_command.run(subprocess.Popen, command_template[:-1],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -1485,8 +1472,7 @@ def tls_address_suffix():
                     )
                 )
                 fp.close()
-                fdbcli_process = subprocess.run(
-                    command_template[:2] + [cluster_fn], capture_output=True
+                fdbcli_process = safe_command.run(subprocess.run, command_template[:2] + [cluster_fn], capture_output=True
                 )
                 assert fdbcli_process.returncode != 0
                 err_out = fdbcli_process.stderr.decode("utf8").strip()
