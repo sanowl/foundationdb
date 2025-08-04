@@ -26,12 +26,13 @@ import sys
 import uuid
 
 from typing import Iterator, List, Optional, Union
+from security import safe_command
 
 
 def run(args: List[str]) -> str:
     print("$ {}".format(" ".join(map(shlex.quote, args))))
     result = []
-    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = safe_command.run(subprocess.Popen, args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while proc.poll() is None:
         text = proc.stdout.readline().decode("utf-8")
         result.append(text)

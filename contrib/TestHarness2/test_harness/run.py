@@ -21,6 +21,7 @@ from test_harness.config import config, BuggifyOptionValue
 from typing import Dict, List, Pattern, OrderedDict
 
 from test_harness.summarize import Summary, SummaryTree
+from security import safe_command
 
 
 @total_ordering
@@ -421,7 +422,7 @@ class TestRun:
             str(self.temp_path),
             "--check-rocksdb",
         ]
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = safe_command.run(subprocess.run, command, capture_output=True, text=True)
         return {
             "stdout": result.stdout,
             "stderr": result.stderr,
@@ -485,8 +486,7 @@ class TestRun:
         # self.log_test_plan(out)
         resources = ResourceMonitor()
         resources.start()
-        process = subprocess.Popen(
-            command,
+        process = safe_command.run(subprocess.Popen, command,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
             cwd=self.temp_path,

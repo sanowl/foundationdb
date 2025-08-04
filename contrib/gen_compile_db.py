@@ -5,6 +5,7 @@ import json
 import re
 import subprocess
 import shlex
+from security import safe_command
 
 
 def actorFile(actor: str, build: str, src: str):
@@ -47,7 +48,7 @@ swiftCompilationCommands = {}
 if len(args.ninjatool) > 0:
     print("aquiring Swift compile commands using {}".format(args.ninjatool))
     try:
-        ninjaInvocation = subprocess.run([args.ninjatool, "-t", "compdb"], cwd=args.builddir, capture_output=True)
+        ninjaInvocation = safe_command.run(subprocess.run, [args.ninjatool, "-t", "compdb"], cwd=args.builddir, capture_output=True)
         ninjaCMDs = json.loads(ninjaInvocation.stdout.decode('utf-8'))
         for fileCmd in ninjaCMDs:
             file = fileCmd['file']
